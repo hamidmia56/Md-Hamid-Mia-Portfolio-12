@@ -19,6 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare launcher logo resource
+        run: cp android/app/src/main/res/drawable/IMG_20261117_014843_619.jpg android/app/src/main/res/drawable/hamid_logo.jpg
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
