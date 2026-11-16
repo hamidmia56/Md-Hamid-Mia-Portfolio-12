@@ -29,7 +29,6 @@ public class MainActivity extends Activity {
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
-        cookies.setAcceptThirdPartyCookies(null, false);
 
         webView = new WebView(this);
         webView.setBackgroundColor(android.graphics.Color.rgb(2, 6, 23));
