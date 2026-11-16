@@ -13,6 +13,9 @@ export interface SiteSettings {
   linkedin_url: string;
   twitter_url: string;
   instagram_url: string;
+  facebook_url: string;
+  tiktok_url: string;
+  youtube_url: string;
   accent_color: string;
   seo_title: string;
   seo_description: string;
@@ -84,6 +87,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   linkedin_url: "",
   twitter_url: "",
   instagram_url: "",
+  facebook_url: "",
+  tiktok_url: "",
+  youtube_url: "",
   accent_color: "56 189 248",
   seo_title: "My Portfolio",
   seo_description: "Personal portfolio website",
