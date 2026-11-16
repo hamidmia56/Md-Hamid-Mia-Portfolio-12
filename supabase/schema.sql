@@ -20,6 +20,9 @@ create table if not exists public.site_settings (
   linkedin_url text not null default '',
   twitter_url text not null default '',
   instagram_url text not null default '',
+  facebook_url text not null default '',
+  tiktok_url text not null default '',
+  youtube_url text not null default '',
   accent_color text not null default '56 189 248',
   seo_title text not null default 'My Portfolio',
   seo_description text not null default 'Personal portfolio website',
@@ -96,7 +99,7 @@ create policy "public read testimonials" on public.testimonials for select using
 create policy "admin write settings"     on public.site_settings for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 create policy "admin write projects"     on public.projects     for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 create policy "admin write skills"       on public.skills       for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin write experience"   on public.experience   for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write experience"   on public.experience  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 create policy "admin write testimonials" on public.testimonials for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- Visitors can SEND messages, only admin can read/manage them
@@ -146,5 +149,5 @@ insert into public.experience (role, company, description, start_date, end_date,
 on conflict do nothing;
 
 insert into public.testimonials (name, role, quote, sort_order) values
-  ('Client Name', 'CEO, Company', 'A short testimonial quote goes here. Edit from admin panel.', 1)
+  ('Client Name', 'CEO, Company', 'A short testimonial quote goes here. Edit from the admin panel.', 1)
 on conflict do nothing;
