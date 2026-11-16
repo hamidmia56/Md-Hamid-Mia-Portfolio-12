@@ -21,6 +21,9 @@ const EMPTY: SettingsForm = {
   linkedin_url: "",
   twitter_url: "",
   instagram_url: "",
+  facebook_url: "",
+  tiktok_url: "",
+  youtube_url: "",
   accent_color: "56 189 248",
   seo_title: "",
   seo_description: "",
@@ -50,7 +53,7 @@ export default function SettingsAdmin() {
         .maybeSingle();
       if (data) {
         const { id: _id, updated_at: _u, ...rest } = data;
-        setForm(rest as SettingsForm);
+        setForm({ ...EMPTY, ...rest } as SettingsForm);
       }
       setLoading(false);
     }
@@ -76,6 +79,16 @@ export default function SettingsAdmin() {
 
   const set = (key: keyof SettingsForm, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  const socialFields = [
+    ["github_url", "GitHub"],
+    ["linkedin_url", "LinkedIn"],
+    ["twitter_url", "Twitter / X"],
+    ["instagram_url", "Instagram"],
+    ["facebook_url", "Facebook"],
+    ["tiktok_url", "TikTok"],
+    ["youtube_url", "YouTube"],
+  ] as const;
 
   return (
     <div className="max-w-2xl">
@@ -167,24 +180,21 @@ export default function SettingsAdmin() {
 
         <section className="card space-y-4">
           <h2 className="font-semibold text-white">Social Links</h2>
-          {(
-            [
-              ["github_url", "GitHub"],
-              ["linkedin_url", "LinkedIn"],
-              ["twitter_url", "Twitter / X"],
-              ["instagram_url", "Instagram"],
-            ] as const
-          ).map(([key, label]) => (
+          {socialFields.map(([key, label]) => (
             <div key={key}>
               <label className="label">{label}</label>
               <input
+                type="url"
                 className="input"
-                placeholder={`https://${label.toLowerCase()}.com/you`}
+                placeholder={`https://.../${label.toLowerCase()}`}
                 value={form[key]}
                 onChange={(e) => set(key, e.target.value)}
               />
             </div>
           ))}
+          <p className="text-xs text-slate-500">
+            Leave a field empty to show its icon as inactive. Add a profile URL to make it clickable.
+          </p>
         </section>
 
         <section className="card space-y-4">
