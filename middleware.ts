@@ -36,8 +36,9 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL;
+  const isPublicAdminRoute =
+    pathname === "/admin/login" || pathname === "/admin/forgot-password";
 
-  // Only the explicitly designated account may access any admin route.
   if (pathname.startsWith("/admin") && user && !isAdmin) {
     await supabase.auth.signOut();
     const url = request.nextUrl.clone();
@@ -48,7 +49,7 @@ export async function middleware(request: NextRequest) {
     return redirect;
   }
 
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !user) {
+  if (pathname.startsWith("/admin") && !isPublicAdminRoute && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
