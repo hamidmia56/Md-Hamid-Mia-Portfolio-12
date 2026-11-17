@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const ADMIN_EMAIL = "hamidmiaff@gmail.com";
-const PASSWORD_RESET_REDIRECT = "https://mdhamidmia.vercel.app/auth/callback?next=/admin/reset-password";
+const PASSWORD_RESET_REDIRECT = "https://mdhamidmia.vercel.app/auth/confirm?next=/admin/reset-password";
 
 export default function LoginPage() {
   const router = useRouter();
