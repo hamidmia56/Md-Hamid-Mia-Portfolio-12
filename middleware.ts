@@ -37,7 +37,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL;
   const isPublicAdminRoute =
-    pathname === "/admin/login" || pathname === "/admin/forgot-password";
+    pathname === "/admin/login" ||
+    pathname === "/admin/forgot-password" ||
+    pathname === "/admin/reset-password";
 
   if (pathname.startsWith("/admin") && user && !isAdmin) {
     await supabase.auth.signOut();
