@@ -96,17 +96,17 @@ create policy "public read experience"   on public.experience   for select using
 create policy "public read testimonials" on public.testimonials for select using (true);
 
 -- Only logged-in admin can change content
-create policy "admin write settings"     on public.site_settings for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin write projects"     on public.projects     for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin write skills"       on public.skills       for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin write experience"   on public.experience  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin write testimonials" on public.testimonials for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write settings"     on public.site_settings for all to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin write projects"     on public.projects     for all to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin write skills"       on public.skills       for all to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin write experience"   on public.experience  for all to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin write testimonials" on public.testimonials for all to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
 
 -- Visitors can SEND messages, only admin can read/manage them
 create policy "public send message" on public.messages for insert with check (true);
-create policy "admin read messages"   on public.messages for select using (auth.role() = 'authenticated');
-create policy "admin update messages" on public.messages for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-create policy "admin delete messages" on public.messages for delete using (auth.role() = 'authenticated');
+create policy "admin read messages"   on public.messages for select to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin update messages" on public.messages for update to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid) with check ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
+create policy "admin delete messages" on public.messages for delete to authenticated using ((select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
 
 -- ---------- STORAGE (images) ----------
 
@@ -118,13 +118,13 @@ create policy "public read images" on storage.objects for select
 using (bucket_id = 'portfolio');
 
 create policy "admin upload images" on storage.objects for insert
-with check (bucket_id = 'portfolio' and auth.role() = 'authenticated');
+with check (bucket_id = 'portfolio' and (select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
 
 create policy "admin update images" on storage.objects for update
-using (bucket_id = 'portfolio' and auth.role() = 'authenticated');
+using (bucket_id = 'portfolio' and (select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
 
 create policy "admin delete images" on storage.objects for delete
-using (bucket_id = 'portfolio' and auth.role() = 'authenticated');
+using (bucket_id = 'portfolio' and (select auth.uid()) = '5609ff26-5d6a-429d-9881-aabe8eebede5'::uuid);
 
 -- ---------- SEED SAMPLE DATA ----------
 
@@ -151,3 +151,17 @@ on conflict do nothing;
 insert into public.testimonials (name, role, quote, sort_order) values
   ('Client Name', 'CEO, Company', 'A short testimonial quote goes here. Edit from the admin panel.', 1)
 on conflict do nothing;
+
+
+-- Explicit API privileges: public reads only; public contact form insert only.
+revoke all privileges on table public.site_settings, public.projects, public.skills,
+  public.experience, public.testimonials, public.messages from anon;
+grant select on table public.site_settings, public.projects, public.skills,
+  public.experience, public.testimonials to anon;
+grant insert on table public.messages to anon;
+
+revoke all privileges on table public.site_settings, public.projects, public.skills,
+  public.experience, public.testimonials, public.messages from authenticated;
+grant select, insert, update, delete on table public.site_settings, public.projects,
+  public.skills, public.experience, public.testimonials, public.messages to authenticated;
+

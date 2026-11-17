@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+
+const ADMIN_EMAIL = "hamidmiaff@gmail.com";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,19 +13,30 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "unauthorized") {
+      setError("This account is not authorized to access the admin panel.");
+    }
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
+    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+      setError("This account is not authorized to access the admin panel.");
+      return;
+    }
+
+    setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
     if (error) {
-      setError(error.message);
+      setError("Unable to sign in. Check your email and password.");
       setLoading(false);
       return;
     }
@@ -46,6 +59,7 @@ export default function LoginPage() {
           <input
             id="email"
             type="email"
+            autoComplete="username"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -59,13 +73,14 @@ export default function LoginPage() {
           <input
             id="password"
             type="password"
+            autoComplete="current-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="input"
           />
         </div>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
         <button type="submit" disabled={loading} className="btn w-full disabled:opacity-50">
           {loading ? "Signing in..." : "Sign In"}
         </button>

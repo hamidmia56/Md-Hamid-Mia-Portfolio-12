@@ -4,6 +4,8 @@ import {
 } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const ADMIN_EMAIL = "hamidmiaff@gmail.com";
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -33,6 +35,18 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL;
+
+  // Only the explicitly designated account may access any admin route.
+  if (pathname.startsWith("/admin") && user && !isAdmin) {
+    await supabase.auth.signOut();
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.search = "?error=unauthorized";
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  }
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !user) {
     const url = request.nextUrl.clone();
@@ -40,7 +54,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname === "/admin/login" && user) {
+  if (pathname === "/admin/login" && isAdmin) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     return NextResponse.redirect(url);
