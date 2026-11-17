@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const ADMIN_EMAIL = "hamidmiaff@gmail.com";
+const PASSWORD_RESET_REDIRECT = "https://mdhamidmia.vercel.app/auth/callback?next=/admin/reset-password";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,12 +62,14 @@ export default function LoginPage() {
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(ADMIN_EMAIL, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/admin/reset-password`,
+      redirectTo: PASSWORD_RESET_REDIRECT,
     });
 
     setLoading(false);
     if (error) {
-      setError("Could not send the reset email. Please try again later.");
+      setError(error.status === 429
+        ? "Too many reset requests. Please wait before requesting another email."
+        : "Could not send the reset email. Please try again later.");
       return;
     }
 
