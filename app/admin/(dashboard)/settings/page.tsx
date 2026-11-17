@@ -73,8 +73,9 @@ export default function SettingsAdmin() {
     setSaving(true);
     setMsg("");
     const supabase = createClient();
+    const { github_url: _githubUrl, ...settingsToSave } = form;
     const { error } = await supabase.from("site_settings")
-      .update({ ...form, updated_at: new Date().toISOString() }).eq("id", 1);
+      .update({ ...settingsToSave, updated_at: new Date().toISOString() }).eq("id", 1);
     setSaving(false);
     setMsg(error ? error.message : "Saved ✓ — refresh your website to see changes.");
   }
