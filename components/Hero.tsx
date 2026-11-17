@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { SiteSettings } from "@/lib/types";
+import { SiteSettings, SocialLink } from "@/lib/types";
 
 type SocialPlatform =
   | "facebook"
@@ -8,9 +8,11 @@ type SocialPlatform =
   | "whatsapp"
   | "instagram"
   | "twitter"
-  | "linkedin";
+  | "linkedin"
+  | "telegram"
+  | "custom";
 
-function SocialIcon({ platform }: { platform: SocialPlatform }) {
+function SocialIcon({ social }: { social: SocialLink }) {
   const common = {
     viewBox: "0 0 24 24",
     className: "h-5 w-5",
@@ -18,7 +20,11 @@ function SocialIcon({ platform }: { platform: SocialPlatform }) {
     "aria-hidden": true as const,
   };
 
-  switch (platform) {
+  if (social.platform === "custom" && social.icon_url) {
+    return <img src={social.icon_url} alt="" className="h-5 w-5 object-contain" />;
+  }
+
+  switch (social.platform as SocialPlatform) {
     case "facebook":
       return <svg {...common}><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.6 1.6-1.6h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.3V13h2.8v8h3.4Z" /></svg>;
     case "youtube":
@@ -33,19 +39,16 @@ function SocialIcon({ platform }: { platform: SocialPlatform }) {
       return <svg {...common}><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-7.4L5.5 22H2.3l7.3-8.4L1.8 2h6.5l4.4 6.8L18.9 2Zm-1.1 18h1.7L7.3 3.9H5.5L17.8 20Z" /></svg>;
     case "linkedin":
       return <svg {...common}><path d="M5.2 3.3a1.9 1.9 0 1 1 0 3.8 1.9 1.9 0 0 1 0-3.8ZM3.5 8.5h3.4v12H3.5v-12Zm5.5 0h3.3v1.6h.1a3.6 3.6 0 0 1 3.2-1.8c3.4 0 4 2.2 4 5.1v7.1h-3.4v-6.3c0-1.5 0-3.4-2.1-3.4s-2.4 1.6-2.4 3.3v6.4H9v-12Z" /></svg>;
+    case "telegram":
+      return <svg {...common}><path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.6 14.1 2 12.7c-1-.3-1-1 .2-1.5L20.1 4.3c.8-.3 1.5.2 1.7-.1Z" /></svg>;
+    case "custom":
+    default:
+      return <svg {...common}><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 3v5.5l4 2.4 1-1.7-3-1.8V7h-2Z" /></svg>;
   }
 }
 
 export default function Hero({ settings }: { settings: SiteSettings }) {
-  const socials: { platform: SocialPlatform; label: string; url: string }[] = [
-    { platform: "facebook", label: "Facebook", url: settings.facebook_url },
-    { platform: "youtube", label: "YouTube", url: settings.youtube_url },
-    { platform: "tiktok", label: "TikTok", url: settings.tiktok_url },
-    { platform: "whatsapp", label: "WhatsApp", url: settings.whatsapp_url },
-    { platform: "instagram", label: "Instagram", url: settings.instagram_url },
-    { platform: "twitter", label: "Twitter / X", url: settings.twitter_url },
-    { platform: "linkedin", label: "LinkedIn", url: settings.linkedin_url },
-  ];
+  const socials = settings.social_links ?? [];
 
   const socialButtonClass =
     "inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-accent hover:bg-slate-800 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
@@ -67,17 +70,17 @@ export default function Hero({ settings }: { settings: SiteSettings }) {
         <div className="flex flex-wrap items-center justify-center gap-3" aria-label="Social media links">
           {socials.map((social) =>
             social.url ? (
-              <a key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={social.label} title={social.label} className={socialButtonClass}>
-                <SocialIcon platform={social.platform} />
+              <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={social.label} title={social.label} className={socialButtonClass}>
+                <SocialIcon social={social} />
               </a>
             ) : (
-              <span key={social.platform} aria-label={`${social.label} link not added yet`} title={`Add ${social.label} URL in Admin → Site Settings`} aria-disabled="true" className={`${socialButtonClass} cursor-not-allowed opacity-40 hover:translate-y-0 hover:border-slate-700 hover:bg-slate-900/70 hover:text-slate-300`}>
-                <SocialIcon platform={social.platform} />
+              <span key={social.id} aria-label={`${social.label} link not added yet`} title={`Add ${social.label} URL in Admin → Site Settings`} aria-disabled="true" className={`${socialButtonClass} cursor-not-allowed opacity-40 hover:translate-y-0 hover:border-slate-700 hover:bg-slate-900/70 hover:text-slate-300`}>
+                <SocialIcon social={social} />
               </span>
             ),
           )}
         </div>
-        <p className="mt-3 text-xs text-slate-500">Add your profile URLs from Admin → Site Settings to activate each icon.</p>
+        <p className="mt-3 text-xs text-slate-500">Manage your social icons from Admin → Site Settings → Social Links.</p>
       </div>
     </section>
   );
