@@ -1,0 +1,61 @@
+name: Vercel Network Diagnostics
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-network-diagnostics
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Check production endpoints
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Probe portfolio and admin login
+        shell: bash
+        run: |
+          set -u
+
+          failed=0
+
+          probe() {
+            local label="$1"
+            local url="$2"
+            local output
+            local curl_status
+            local http_code
+
+            echo "::group::${label} — $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            output="$(curl --silent --show-error --location \
+              --connect-timeout 10 --max-time 25 \
+              --output /dev/null \
+              --write-out 'http_code=%{http_code} remote_ip=%{remote_ip} dns=%{time_namelookup}s connect=%{time_connect}s tls=%{time_appconnect}s ttfb=%{time_starttransfer}s total=%{time_total}s' \
+              "$url" 2>&1)"
+            curl_status=$?
+            echo "$output"
+            echo "curl_exit_code=$curl_status"
+
+            http_code="$(printf '%s\n' "$output" | sed -n 's/.*http_code=\([0-9][0-9][0-9]\).*/\1/p')"
+            if [[ "$curl_status" -ne 0 || "$http_code" != "200" ]]; then
+              failed=1
+              echo "::error::${label} probe failed (curl=${curl_status}, HTTP=${http_code:-unknown})"
+            fi
+            echo "::endgroup::"
+          }
+
+          probe "Portfolio homepage" "https://mdhamidmia.vercel.app/"
+          probe "Admin login" "https://mdhamidmia.vercel.app/admin/login"
+
+          if [[ "$failed" -ne 0 ]]; then
+            echo "::error::One or more production endpoint checks failed."
+            exit 1
+          fi
+
+          echo "Both production endpoints returned HTTP 200."
